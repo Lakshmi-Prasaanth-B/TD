@@ -38,9 +38,7 @@ export default function Todo(){
     },[])
 
     const getItems = ()=>{
-        fetch("http://localhost:8000/todos",{
-            method: 'GET',
-        })
+        fetch("http://localhost:8000/todos")
         .then((res)=>res.json())
         .then((res)=>{
             setTodos(res)
@@ -64,26 +62,19 @@ export default function Todo(){
         <div className="row mt-3">
             <h3>Tasks</h3>
             <ul className="list-group">
-                <li className="list-group-item bg-info d-flex justify-content-between align-items-center my-2">
-                    <div className="d-flex flex-column">
-                        <span className="fw-bold">Item Title</span>
-                        <span>Item Desc</span>
-                    </div>
-                    <div className="d-flex gap-2">
-                        <button className="btn bg-warning">Edit</button>
-                        <button className="btn bg-danger">Delete</button>
-                    </div>
-                </li>
-                <li className="list-group-item bg-info d-flex justify-content-between align-items-center my-2">
-                    <div className="d-flex flex-column">
-                        <span className="fw-bold">Item Title</span>
-                        <span>Item Desc</span>
-                    </div>
-                    <div className="d-flex gap-2">
-                        <button className="btn bg-warning">Edit</button>
-                        <button className="btn bg-danger">Delete</button>
-                    </div>
-                </li>
+                {
+                todos.map((item)=>
+                    <li className="list-group-item bg-info d-flex justify-content-between align-items-center my-2">
+                        <div className="d-flex flex-column">
+                            <span className="fw-bold">{item.title}</span>
+                            <span>{item.description}</span>
+                        </div>
+                        <div className="d-flex gap-2">
+                            <button className="btn bg-warning">Edit</button>
+                            <button className="btn bg-danger">Delete</button>
+                        </div>
+                    </li>
+                )}
             </ul>
         </div>
     </>
