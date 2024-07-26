@@ -5,7 +5,13 @@ export default function Todo(){
     const [description, setDescription] = useState("");
     const [todos, setTodos] = useState([])
     const [message, setMessage] = useState("")
+    const [editId, setEditId] = useState(-1);
     const [error, setError] = useState("")
+
+    // Edit
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+
     const apiUrl = "http://localhost:8000";
     const handleSubmit = ()=>{
         setError("")
@@ -44,6 +50,47 @@ export default function Todo(){
             setTodos(res)
         })
     }
+    const handleEdit = (item)=>{
+        setEditId(item._id);
+        setEditTitle(item.title);
+        setEditDescription(item.description);
+    }
+    const handleEditCancel = ()=>{
+        setEditId(-1);
+    }
+    const handleUpdate = ()=>{
+        setError("")
+        if (editTitle.trim()!=='' && editDescription.trim()!==''){
+            fetch(apiUrl+"/todos"+editId,{
+                method: 'PUT',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify({title: editId, description:editDescription})
+            }).then((res)=>{
+                if(res.ok){
+                    const updatedTodos = todos.map((item)=>{
+                        if (item._id===editId){
+                            item.title = editTitle;
+                            item.description = editDescription;
+                        }
+                        return item;
+                    })
+                    setTodos(updatedTodos)
+                    setMessage("Item Updated Successfully")
+                    setTimeout(()=>{
+                        setMessage("")
+                    },3000)
+                    setEditId(-1);
+                }
+                else{
+                    setError("Unable to create Todo Item");
+                }
+            }).catch(()=>{
+                setError("Unable to create ToDo Item");
+            })
+        }
+    }
 
     return <>
         <div className="row p-3 bg-success text-light">
@@ -65,13 +112,24 @@ export default function Todo(){
                 {
                 todos.map((item)=>
                     <li className="list-group-item bg-info d-flex justify-content-between align-items-center my-2">
-                        <div className="d-flex flex-column">
-                            <span className="fw-bold">{item.title}</span>
-                            <span>{item.description}</span>
+                        <div className="d-flex flex-column me-2">
+                            {
+                                editId===-1 || editId !== item._id ?<>
+                                    <span className="fw-bold">{item.title}</span>
+                                    <span>{item.description}</span>
+                                </>:<>
+                                    <div className="form-group d-flex gap-2">
+                                        <input placeholder="Title" onChange={(e)=>{setEditTitle(e.target.value)}} value={editTitle} className="form-control" type="text"/>
+                                        <input placeholder="Description" onChange={(e)=>{setEditDescription(e.target.value)}} value={editDescription} className="form-control" type="text"/>
+                                    </div>
+                                </>
+                            }
                         </div>
                         <div className="d-flex gap-2">
-                            <button className="btn bg-warning">Edit</button>
-                            <button className="btn bg-danger">Delete</button>
+                            {editId===-1 ? <button className="btn bg-warning" onClick={()=>handleEdit(item)}>Edit</button>:<button className="btn bg-warning" onClick={handleUpdate}>Update</button>}
+                            {editId===-1 ? <button className="btn bg-danger">Delete</button>:
+                                <button className="btn bg-danger" onClick={handleEditCancel}>Cancel</button>
+                            }
                         </div>
                     </li>
                 )}
